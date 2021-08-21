@@ -3,10 +3,12 @@ package com.example.emailschedulerwithquartz.api;
 import com.example.emailschedulerwithquartz.dto.EmailRequestDTO;
 import com.example.emailschedulerwithquartz.dto.EmailResponseDTO;
 import com.example.emailschedulerwithquartz.quartz.job.EmailJob;
+import com.sun.mail.iap.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,6 +52,11 @@ public class EmailSchedulerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(emailResponseDTO);
         }
+    }
+
+    @GetMapping("/get")
+    public ResponseEntity<?> getApiTest(){
+        return ResponseEntity.ok("Get API Test - Pass");
     }
 
 
