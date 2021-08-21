@@ -2,10 +2,12 @@ package com.example.emailschedulerwithquartz.api;
 
 import com.example.emailschedulerwithquartz.dto.EmailRequestDTO;
 import com.example.emailschedulerwithquartz.dto.EmailResponseDTO;
+import com.example.emailschedulerwithquartz.dto.RescheduleMinuteDTO;
 import com.example.emailschedulerwithquartz.quartz.job.EmailJob;
 import com.sun.mail.iap.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
+import org.quartz.impl.triggers.CronTriggerImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,6 +56,31 @@ public class EmailSchedulerController {
         }
     }
 
+    @PostMapping("/reschedule/email")
+    public ResponseEntity<?> rescheduleEmail(@RequestBody RescheduleMinuteDTO rescheduleMinuteDTO) {
+        //istek atan kisi triggername, triggergroup, jobname, jobgroup bunlari verse yeter.
+        TriggerKey triggerName = new TriggerKey("8313cdcc-162f-4928-b0ba-996b516fb219","email-triggers");
+        JobKey jobKey = new JobKey("8313cdcc-162f-4928-b0ba-996b516fb219","email-jobs");
+        try {
+            CronTrigger trigger = (CronTrigger) scheduler.getTrigger(triggerName);
+            JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+
+            Trigger newTrigger = TriggerBuilder.newTrigger()
+                    .forJob(jobDetail)
+                    .withIdentity(jobDetail.getKey().getName(), jobDetail.getKey().getGroup())
+                    .withDescription(trigger.getDescription())
+                    //.startAt(Date.from(startAt.toInstant()))
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0 0/"+rescheduleMinuteDTO.getMinute()+" * * * ?"))
+                    .build();
+            scheduler.rescheduleJob(triggerName,newTrigger);
+
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.ok("basarili");
+    }
+
     @GetMapping("/get")
     public ResponseEntity<?> getApiTest(){
         return ResponseEntity.ok("Get API Test - Pass");
@@ -79,8 +106,10 @@ public class EmailSchedulerController {
                 .forJob(jobDetail)
                 .withIdentity(jobDetail.getKey().getName(), "email-triggers")
                 .withDescription("Send Email Trigger")
-                .startAt(Date.from(startAt.toInstant()))
-                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
+                //.startAt(Date.from(startAt.toInstant()))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 * * * ?"))
                 .build();
     }
+
+
 }
