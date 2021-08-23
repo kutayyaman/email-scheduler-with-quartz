@@ -67,7 +67,7 @@ public class EmailSchedulerController {
 
             Trigger newTrigger = TriggerBuilder.newTrigger()
                     .forJob(jobDetail)
-                    .withIdentity(jobDetail.getKey().getName(), jobDetail.getKey().getGroup())
+                    .withIdentity(trigger.getKey().getName(), trigger.getKey().getGroup())
                     .withDescription(trigger.getDescription())
                     //.startAt(Date.from(startAt.toInstant()))
                     .withSchedule(CronScheduleBuilder.cronSchedule("0 0/"+rescheduleMinuteDTO.getMinute()+" * * * ?"))
